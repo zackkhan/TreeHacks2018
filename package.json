@@ -1,0 +1,23 @@
+{
+  "name": "TreeHacks2018",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zackkhan/TreeHacks2018.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zackkhan/TreeHacks2018/issues"
+  },
+  "homepage": "https://github.com/zackkhan/TreeHacks2018#readme",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
+}
