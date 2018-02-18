@@ -36,6 +36,10 @@ var AnalysisSchema = new mongoose.Schema({
     sentiment: {
         type: Number,
         required: false
+    },
+    search_results: {
+        type: [Object],
+        required: false
     }
 });
 

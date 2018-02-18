@@ -11,9 +11,23 @@ from os import path
 from PIL import Image
 from pprint import pprint
 from IPython.display import HTML
-
+import json
 
 class Speech:
+    def split_string(self, s, k):
+        res_list = []
+        count = 0
+        curr_string = ""
+        sentences = s.split('.')
+        for word in sentences:
+            if (count == len(sentences) or count % k == 0):
+                if curr_string != "":
+                    res_list.append(curr_string)
+                curr_string = ""
+            curr_string += word + "."
+            count += 1
+        return res_list
+
     def emotions_from_image(self, image_path):
         headers = {
             'Ocp-Apim-Subscription-Key': self.kEMOTION_KEY,
@@ -29,12 +43,15 @@ class Speech:
         response = requests.post(
             self.kEMOTION_URL, params=params, headers=headers, data=img_data)
         faces = response.json()
-        fr = faces[0]["faceRectangle"]
-        fa = faces[0]["faceAttributes"]
-        headPose = fa["headPose"]
-        emotions = fa["emotion"]
-        emotion = max(emotions, key=lambda key: emotions[key])
-        return emotion, headPose
+        try:
+            fr = faces[0]["faceRectangle"]
+            fa = faces[0]["faceAttributes"]
+            headPose = fa["headPose"]
+            emotions = fa["emotion"]
+            emotion = max(emotions, key=lambda key: emotions[key])
+            return emotion, headPose
+        except Exception:
+            return "error", {'roll': 0.0, 'pitch': 0.0, 'yaw':0.0 }
 
     def speech_to_text(self, file_path):
         audio_file = path.join(path.dirname(
@@ -68,18 +85,24 @@ class Speech:
         return key_phrases['documents'][0]['keyPhrases']
 
     def get_search_results(self, search_term):
-        headers = {"Ocp-Apim-Subscription-Key": self.kSEARCH_KEY}
-        params = {"q": search_term,
-                  "textDecorations": True, "textFormat": "HTML"}
-        response = requests.get(
-            self.kSEARCH_URL, headers=headers, params=params)
+        headers = {"Ocp-Apim-Subscription-Key" : self.kSEARCH_KEY}
+        params  = {"q": search_term, "textDecorations":True, "textFormat":"HTML"}
+        response = requests.get(self.kSEARCH_URL, headers=headers, params=params)
         response.raise_for_status()
         search_results = response.json()
-        rows = "\n".join(["""<tr>
-                           <td><a href=\"{0}\">{1}</a></td>
-                           <td>{2}</td>
-                         </tr>""".format(v["url"], v["name"], v["snippet"]) for v in search_results["webPages"]["value"]])
-        return HTML("<table>{0}</table>".format(rows))
+        results = {}
+        results[search_term] = []
+        i = 0
+        for v in search_results["webPages"]["value"]:
+            if i >= 2:
+                return results
+            result = {}
+            result["url"] = v["url"]
+            result["name"] = v["name"]
+            result["snippet"] = v["snippet"]
+            results[search_term].append(result)
+            i+=1
+        return results
 
     def __init__(self):
         # Face API

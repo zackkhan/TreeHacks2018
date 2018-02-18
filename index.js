@@ -8,7 +8,7 @@ var schedule = require('node-schedule')
 var Analysis = require('./models/Analysis')
 var request = require('request')
 var PythonShell = require('python-shell');
-var pyshell = new PythonShell('/python/frames2.py');
+var pyshell = new PythonShell('/python/frames.py');
 
 dotenv.load()
 
@@ -47,20 +47,23 @@ app.post('/record', function(req, res) {
   }
 );
 
-PythonShell.run('/python/frames2.py', function(err, data){
+PythonShell.run('/python/frames.py', function(err, data){
     if (err){
         console.log(err);
     } else {
-        console.log('THIS IS IT!!!!');
         var jsonData = JSON.parse(data);
         console.log(jsonData);
         for (var i in jsonData) {
             var analysis = new Analysis ({
-              time: jsonData[i].time
-              //text: a.text,
-              //expression: a.expression,
-              //keywords: a.keywords,
-              //sentiment: a.sentiment
+              time: jsonData[i].time,
+              text: jsonData[i].text,
+              expression: jsonData[i].expression,
+              keywords: jsonData[i].keywords,
+              sentiment: jsonData[i].sentiment
+              //roll: jsonData[i].roll,
+              //pitch: jsonData[i].pitch,
+              //yaw: jsonData[i].yaw,
+
           });
             analysis.save(function(err){
               if (err){
